@@ -60,7 +60,6 @@ if [ "${INCLUDE_PASSWALL}" = "true" ]; then
 fi
 
 if [ "${INCLUDE_MOSDNS}" = "true" ]; then
-  require_config "CONFIG_PACKAGE_luci-app-mosdns"
   require_config "CONFIG_PACKAGE_mosdns"
 fi
 
