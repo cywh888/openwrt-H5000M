@@ -57,6 +57,12 @@ if [ "${INCLUDE_PASSWALL}" = "true" ]; then
   echo "启用 PassWall"
   append_config <<'EOF'
 CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_libncurses=y
+CONFIG_PACKAGE_kmod-nft-socket=y
+CONFIG_PACKAGE_kmod-nft-tproxy=y
+CONFIG_PACKAGE_kmod-inet-diag=y
+CONFIG_PACKAGE_kmod-netlink-diag=y
+CONFIG_PACKAGE_kmod-tun=y
 EOF
 fi
 

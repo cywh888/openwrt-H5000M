@@ -53,6 +53,12 @@ fi
 
 if [ "${INCLUDE_PASSWALL}" = "true" ]; then
   require_config "CONFIG_PACKAGE_luci-app-passwall"
+  require_config "CONFIG_PACKAGE_libncurses"
+  require_config "CONFIG_PACKAGE_kmod-nft-socket"
+  require_config "CONFIG_PACKAGE_kmod-nft-tproxy"
+  require_config "CONFIG_PACKAGE_kmod-inet-diag"
+  require_config "CONFIG_PACKAGE_kmod-netlink-diag"
+  require_config "CONFIG_PACKAGE_kmod-tun"
   require_config "CONFIG_PACKAGE_chinadns-ng"
   require_config "CONFIG_PACKAGE_dns2socks"
   require_config "CONFIG_PACKAGE_ipt2socks"

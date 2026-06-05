@@ -13,13 +13,24 @@ else
 	(printf 'admin\nadmin\n' | passwd root) >/dev/null 2>&1 || true
 fi
 
-logger -t h5000m-defaults "清理固件内的 QModem 软件源"
+logger -t h5000m-defaults "设置默认 WiFi 密码"
+if ! uci -q show wireless | grep -q '=wifi-iface'; then
+	wifi config >/dev/null 2>&1 || true
+fi
+
+for section in $(uci -q show wireless | sed -n 's/^\(wireless\.[^.]*\)=wifi-iface$/\1/p'); do
+	uci -q set "${section}.encryption=psk2"
+	uci -q set "${section}.key=1234567890"
+done
+uci -q commit wireless
+
+logger -t h5000m-defaults "清理固件内的 QModem 和 video 软件源"
 if [ -f /etc/apk/repositories.d/distfeeds.list ]; then
-	sed -i '/\/qmodem\//d;/ qmodem[ _-]/d;/ qmodem$/d' /etc/apk/repositories.d/distfeeds.list
+	sed -i '/\/qmodem\//d;/ qmodem[ _-]/d;/ qmodem$/d;/\/video\//d' /etc/apk/repositories.d/distfeeds.list
 fi
 
 if [ -f /etc/opkg/distfeeds.conf ]; then
-	sed -i '/\/qmodem\//d;/ qmodem[ _-]/d;/ qmodem$/d' /etc/opkg/distfeeds.conf
+	sed -i '/\/qmodem\//d;/ qmodem[ _-]/d;/ qmodem$/d;/\/video\//d' /etc/opkg/distfeeds.conf
 fi
 
 exit 0
