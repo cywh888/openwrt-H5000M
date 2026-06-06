@@ -81,7 +81,7 @@ if [ "${INCLUDE_MOSDNS_LUCI}" = "true" ]; then
       -e '/$(INSTALL_DIR) $(1)\/etc\/init.d/d' \
       -e '/$(INSTALL_BIN) $(PKG_BUILD_DIR)\/scripts\/openwrt\/mosdns-init-openwrt $(1)\/etc\/init.d\/mosdns/d' \
       "${MOSDNS_MAKEFILE}"
-    echo "已避免官方 mosdns init 脚本与 luci-app-mosdns 冲突"
+    echo "已避免 mosdns init 脚本与 luci-app-mosdns 冲突"
   fi
   append_config <<'EOF'
 CONFIG_PACKAGE_mosdns=y

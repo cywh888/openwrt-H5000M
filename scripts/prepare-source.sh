@@ -1,23 +1,53 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REF="${1:-v25.12.0}"
-REPO_URL="${IMMORTALWRT_REPO:-https://github.com/immortalwrt/immortalwrt.git}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_DIR="${ROOT_DIR}/openwrt"
+
+SOURCE_TREE="${SOURCE_TREE:-${1:-openwrt}}"
+REF="${2:-${SOURCE_REF:-${OPENWRT_REF:-v25.12.4}}}"
+
+if [ "$#" -eq 1 ]; then
+  case "${SOURCE_TREE}" in
+    openwrt|immortalwrt)
+      ;;
+    *)
+      REF="${SOURCE_TREE}"
+      SOURCE_TREE="${SOURCE_TREE_DEFAULT:-openwrt}"
+      ;;
+  esac
+fi
+
+case "${SOURCE_TREE}" in
+  openwrt)
+    REPO_URL="${OPENWRT_REPO:-https://github.com/openwrt/openwrt.git}"
+    TREE_NAME="OpenWrt"
+    ;;
+  immortalwrt)
+    REPO_URL="${IMMORTALWRT_REPO:-https://github.com/immortalwrt/immortalwrt.git}"
+    TREE_NAME="ImmortalWrt"
+    ;;
+  *)
+    echo "未知主源码：${SOURCE_TREE}，可选值：openwrt / immortalwrt"
+    exit 1
+    ;;
+esac
+
 INCLUDE_QMODEM="${INCLUDE_QMODEM:-false}"
 INCLUDE_PASSWALL="${INCLUDE_PASSWALL:-false}"
 INCLUDE_MOSDNS="${INCLUDE_MOSDNS:-false}"
 INCLUDE_MOSDNS_LUCI="${INCLUDE_MOSDNS_LUCI:-false}"
 INCLUDE_UPNP="${INCLUDE_UPNP:-false}"
 INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
+INCLUDE_SMALL_PACKAGE="${INCLUDE_SMALL_PACKAGE:-false}"
 
 if [ -d "${SRC_DIR}/.git" ]; then
-  echo "更新已有 ImmortalWrt 源码：${REF}"
+  echo "更新已有 ${TREE_NAME} 源码：${REF}"
+  git -C "${SRC_DIR}" remote set-url origin "${REPO_URL}"
   git -C "${SRC_DIR}" fetch --tags --depth=1 origin "${REF}"
   git -C "${SRC_DIR}" checkout --detach FETCH_HEAD
 else
-  echo "克隆 ImmortalWrt 源码：${REF}"
+  echo "克隆 ${TREE_NAME} 源码：${REF}"
   git clone --depth=1 --branch "${REF}" "${REPO_URL}" "${SRC_DIR}"
 fi
 
@@ -46,12 +76,28 @@ append_feed_once() {
 }
 
 if [ "${INCLUDE_QMODEM}" = "true" ]; then
-  echo "添加 QModem 软件源"
+  echo "添加 QModem 第三方 feed"
   append_feed_once "src-git qmodem https://github.com/FUjr/QModem.git"
 fi
 
+if [ "${INCLUDE_PASSWALL}" = "true" ]; then
+  echo "添加 PassWall 第三方 feed"
+  append_feed_once "src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git"
+  append_feed_once "src-git passwall https://github.com/Openwrt-Passwall/openwrt-passwall.git"
+fi
+
+if [ "${INCLUDE_HOMEPROXY}" = "true" ]; then
+  echo "添加 HomeProxy 第三方 feed"
+  append_feed_once "src-git homeproxy https://github.com/VIKINGYFY/homeproxy.git"
+fi
+
+if [ "${INCLUDE_SMALL_PACKAGE}" = "true" ]; then
+  echo "添加 kenzok8 small-package 额外插件 feed"
+  append_feed_once "src-git small_package https://github.com/kenzok8/small-package.git"
+fi
+
 if [ "${INCLUDE_MOSDNS_LUCI}" = "true" ]; then
-  echo "添加第三方 MosDNS LuCI 页面，不替换 ImmortalWrt 官方 mosdns 本体"
+  echo "添加第三方 MosDNS LuCI 页面，本体仍优先使用主源码 feeds 中的 mosdns"
   MOSDNS_LUCI_CACHE="${ROOT_DIR}/build-cache/sbwml-luci-app-mosdns"
   MOSDNS_LUCI_PACKAGE_DIR="${SRC_DIR}/package/h5000m-mosdns-luci"
 
@@ -77,7 +123,8 @@ rm -rf "${SRC_DIR}/package/h5000m-custom"
 mkdir -p "${SRC_DIR}/package/h5000m-custom"
 cp -a "${ROOT_DIR}/packages/." "${SRC_DIR}/package/h5000m-custom/"
 
-echo "ImmortalWrt 源码已准备完成：${SRC_DIR}"
+echo "${TREE_NAME} 源码已准备完成：${SRC_DIR}"
+echo "当前主源码：${SOURCE_TREE}"
 echo "当前源码版本：${REF}"
 echo "后续本地编译步骤："
 echo "  cd ${SRC_DIR}"
