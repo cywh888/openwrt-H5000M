@@ -228,11 +228,12 @@ jobs:
         working-directory: openwrt
         run: |
           {
+            echo "CONFIG_DEVEL=y"
             echo "CONFIG_CCACHE=y"
             echo "CONFIG_CCACHE_DIR=\"${CCACHE_DIR}\""
           } >> .config
           make defconfig
-          grep -E '^CONFIG_CCACHE=y|^CONFIG_CCACHE_DIR=|^CONFIG_DOWNLOAD_FOLDER=|^CONFIG_TARGET_' .config | sed -n '1,80p'
+          grep -E '^CONFIG_DEVEL=y|^CONFIG_CCACHE=y|^CONFIG_CCACHE_DIR=|^CONFIG_DOWNLOAD_FOLDER=|^CONFIG_TARGET_' .config | sed -n '1,80p'
 
       - name: 检查勾选的软件包
         env:
