@@ -158,13 +158,28 @@ jobs:
 
       - name: 发布到 GitHub Releases
         if: ${{ inputs.create_release }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: ${{ env.RELEASE_NAME }}
-          files: openwrt/bin/targets/mediatek/filogic/*
-          fail_on_unmatched_files: true
-          make_latest: false
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=()
+          for file in openwrt/bin/targets/mediatek/filogic/*; do
+            [ -f "${file}" ] && files+=("${file}")
+          done
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "未找到可发布的固件文件。"
+            exit 1
+          fi
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" "${files[@]}" --clobber
+          else
+            gh release create "${RELEASE_TAG}" "${files[@]}" \
+              --title "${RELEASE_NAME}" \
+              --notes "ImmortalWrt-H5000M ${{ inputs.immortalwrt_ref }} build ${{ github.run_number }}" \
+              --target "${GITHUB_SHA}" \
+              --latest=false
+          fi
 
   build-self-hosted:
     name: 本地 Runner 编译
@@ -287,10 +302,25 @@ jobs:
 
       - name: 发布到 GitHub Releases
         if: ${{ inputs.create_release }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: ${{ env.RELEASE_NAME }}
-          files: openwrt/bin/targets/mediatek/filogic/*
-          fail_on_unmatched_files: true
-          make_latest: false
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=()
+          for file in openwrt/bin/targets/mediatek/filogic/*; do
+            [ -f "${file}" ] && files+=("${file}")
+          done
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "未找到可发布的固件文件。"
+            exit 1
+          fi
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" "${files[@]}" --clobber
+          else
+            gh release create "${RELEASE_TAG}" "${files[@]}" \
+              --title "${RELEASE_NAME}" \
+              --notes "ImmortalWrt-H5000M ${{ inputs.immortalwrt_ref }} build ${{ github.run_number }}" \
+              --target "${GITHUB_SHA}" \
+              --latest=false
+          fi
