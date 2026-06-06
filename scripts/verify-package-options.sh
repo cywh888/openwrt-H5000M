@@ -76,12 +76,7 @@ if [ "${INCLUDE_HOMEPROXY}" = "true" ]; then
 fi
 
 if [ "${INCLUDE_MOSDNS}" = "true" ]; then
-  require_config "CONFIG_PACKAGE_mosdns"
   require_config "CONFIG_PACKAGE_luci-app-mosdns"
-  require_config "CONFIG_PACKAGE_v2dat"
-  require_config "CONFIG_PACKAGE_v2ray-geoip"
-  require_config "CONFIG_PACKAGE_v2ray-geosite"
-  require_config "CONFIG_PACKAGE_curl"
 fi
 
 if [ "${missing}" -ne 0 ]; then

@@ -82,12 +82,7 @@ fi
 if [ "${INCLUDE_MOSDNS}" = "true" ]; then
   echo "启用 MosDNS"
   append_config <<'EOF'
-CONFIG_PACKAGE_mosdns=y
 CONFIG_PACKAGE_luci-app-mosdns=y
-CONFIG_PACKAGE_v2dat=y
-CONFIG_PACKAGE_v2ray-geoip=y
-CONFIG_PACKAGE_v2ray-geosite=y
-CONFIG_PACKAGE_curl=y
 EOF
 fi
 

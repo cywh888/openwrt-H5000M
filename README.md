@@ -32,7 +32,7 @@
 - `upnp`: 默认开启
 - `passwall`: 默认关闭
 - `homeproxy`: 默认关闭
-- `mosdns`: 默认关闭，包含 mosdns 本体和 luci-app-mosdns
+- `mosdns`: 默认关闭，勾选 luci-app-mosdns，相关依赖由软件包自动带入
 - `small_package`: 按需开启
 - `create_release`: 默认开启
 - `make_jobs`: 留空，或填写 `4`、`8` 这类线程数
