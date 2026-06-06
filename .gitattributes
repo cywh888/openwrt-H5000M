@@ -3,6 +3,7 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.patch text eol=lf
+*.seed text eol=lf
 files/etc/uci-defaults/* text eol=lf
 files/etc/hotplug.d/**/* text eol=lf
 packages/**/root/etc/uci-defaults/* text eol=lf

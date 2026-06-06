@@ -170,6 +170,10 @@ jobs:
     name: 本地 Runner 编译
     if: inputs.runner_type == 'self-hosted'
     runs-on: self-hosted
+    env:
+      USE_CCACHE: "1"
+      CCACHE_DIR: /home/builder/openwrt-cache/ccache
+      DL_DIR: /home/builder/openwrt-cache/dl
 
     steps:
       - name: 检出构建项目
@@ -182,6 +186,17 @@ jobs:
             exit 1
           fi
           echo "本地 Runner 检查通过。"
+
+      - name: 配置本地缓存与代理
+        run: |
+          mkdir -p "${CCACHE_DIR}" "${DL_DIR}"
+          ccache --set-config=max_size=80G || ccache -M 80G
+          git config --global http.proxy "${http_proxy:-http://127.0.0.1:10808}"
+          git config --global https.proxy "${https_proxy:-http://127.0.0.1:10808}"
+          echo "源码包缓存目录：${DL_DIR}"
+          echo "编译缓存目录：${CCACHE_DIR}"
+          ccache -s -v | sed -n '1,80p'
+          du -sh "${DL_DIR}" "${CCACHE_DIR}" 2>/dev/null || true
 
       - name: 准备 ImmortalWrt 源码
         env:
@@ -211,7 +226,9 @@ jobs:
 
       - name: 生成最终配置
         working-directory: openwrt
-        run: make defconfig
+        run: |
+          make defconfig
+          grep -E '^CONFIG_CCACHE=y|^CONFIG_TARGET_' .config | sed -n '1,40p'
 
       - name: 检查勾选的软件包
         env:
@@ -225,7 +242,9 @@ jobs:
 
       - name: 下载源码包
         working-directory: openwrt
-        run: make download -j"$(nproc)"
+        run: |
+          make download -j"$(nproc)"
+          du -sh "${DL_DIR}" 2>/dev/null || true
 
       - name: 编译固件
         working-directory: openwrt
@@ -240,6 +259,12 @@ jobs:
         if: ${{ failure() }}
         working-directory: openwrt
         run: make -j1 V=s
+
+      - name: 输出本地缓存统计
+        if: ${{ always() }}
+        run: |
+          ccache -s -v | sed -n '1,100p'
+          du -sh "${DL_DIR}" "${CCACHE_DIR}" 2>/dev/null || true
 
       - name: 上传固件产物
         uses: actions/upload-artifact@v4
