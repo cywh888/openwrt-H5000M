@@ -30,7 +30,10 @@ if [ -f /etc/config/qmodem ]; then
 	uci -q set qmodem.usb0.type='usb'
 	uci -q set qmodem.usb0.alias='USB'
 	uci -q set qmodem.main.enable_pcie_scan='0'
-	uci -q set qmodem.main.start_delay='9'
+	uci -q set qmodem.main.enable_usb_scan='0'
+	uci -q set qmodem.main.try_preset_pcie='0'
+	uci -q set qmodem.main.try_preset_usb='1'
+	uci -q set qmodem.main.start_delay='0'
 	uci -q commit qmodem
 fi
 
