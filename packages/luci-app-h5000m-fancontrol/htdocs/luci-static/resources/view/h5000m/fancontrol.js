@@ -74,10 +74,16 @@ return view.extend({
 			'.h5000m-fan-card-value{font-size:21px;line-height:1.25;font-weight:600;color:var(--text-color-high,#222);word-break:break-word}',
 			'.h5000m-fan-card-hint{font-size:11px;color:var(--text-color-low,#888);margin-top:6px;word-break:break-word}',
 			'.h5000m-fan-note{margin-top:10px;color:var(--text-color-medium,#666)}',
-			'.h5000m-fan-curve-box{border:1px solid var(--border-color-medium,#d8d8d8);border-radius:8px;background:var(--background-color-high,#fff);padding:12px;overflow:hidden}',
-			'.h5000m-fan-curve-canvas{width:100%;max-width:720px;height:240px;display:block}',
-			'.h5000m-fan-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;color:var(--text-color-medium,#666);font-size:12px}',
+			'.h5000m-fan-curve-box{border:1px solid var(--border-color-medium,#d8d8d8);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));padding:14px;overflow:hidden}',
+			'.h5000m-fan-curve-layout{display:grid;grid-template-columns:minmax(320px,1fr) 210px;gap:16px;align-items:stretch}',
+			'.h5000m-fan-curve-canvas{width:100%;height:280px;display:block;border-radius:6px}',
+			'.h5000m-fan-curve-side{display:grid;grid-template-columns:1fr;gap:10px}',
+			'.h5000m-fan-curve-chip{border:1px solid var(--border-color-low,#30363d);border-radius:8px;padding:10px;background:rgba(255,255,255,.035)}',
+			'.h5000m-fan-curve-chip-title{font-size:12px;color:var(--text-color-medium,#777);margin-bottom:4px}',
+			'.h5000m-fan-curve-chip-value{font-size:20px;font-weight:600;color:#dce2e8}',
+			'.h5000m-fan-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;color:var(--text-color-medium,#666);font-size:12px}',
 			'.h5000m-fan-swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}',
+			'@media (max-width: 900px){.h5000m-fan-curve-layout{grid-template-columns:1fr}.h5000m-fan-curve-side{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}}',
 			'.h5000m-fan-slider{display:flex;align-items:center;gap:10px;max-width:460px}',
 			'.h5000m-fan-slider input[type="range"]{flex:1;min-width:180px}',
 			'.h5000m-fan-slider input[type="number"]{width:82px}'
@@ -124,7 +130,7 @@ return view.extend({
 	drawCurveCanvas: function(canvasId, config) {
 		var canvas = document.getElementById(canvasId);
 		var ratio, width, height, ctx, left, top, right, bottom, plotW, plotH;
-		var tempMin, tempMax, lowX, highX, minY, maxY, manualY, currentX, currentY;
+		var tempMin, tempMax, lowX, highX, minY, maxY, manualY, currentX, currentY, gradient;
 		var xForTemp, yForPwm;
 
 		if (!canvas)
@@ -141,10 +147,10 @@ return view.extend({
 		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 		ctx.clearRect(0, 0, width, height);
 
-		left = 52;
-		top = 20;
-		right = 22;
-		bottom = 42;
+		left = 54;
+		top = 22;
+		right = 24;
+		bottom = 46;
 		plotW = width - left - right;
 		plotH = height - top - bottom;
 
@@ -166,13 +172,13 @@ return view.extend({
 		minY = yForPwm(config.minPwm);
 		maxY = yForPwm(config.maxPwm);
 
-		ctx.fillStyle = '#fafafa';
-		ctx.strokeStyle = '#dedede';
+		ctx.fillStyle = '#17191c';
+		ctx.strokeStyle = '#343941';
 		ctx.lineWidth = 1;
 		ctx.fillRect(left, top, plotW, plotH);
 		ctx.strokeRect(left, top, plotW, plotH);
 
-		ctx.strokeStyle = '#eeeeee';
+		ctx.strokeStyle = 'rgba(255,255,255,.07)';
 		ctx.beginPath();
 		for (var i = 1; i < 4; i++) {
 			ctx.moveTo(left, top + plotH * i / 4);
@@ -182,7 +188,7 @@ return view.extend({
 		}
 		ctx.stroke();
 
-		ctx.strokeStyle = '#cfcfcf';
+		ctx.strokeStyle = 'rgba(255,255,255,.18)';
 		ctx.setLineDash([4, 4]);
 		ctx.beginPath();
 		ctx.moveTo(lowX, top);
@@ -192,7 +198,22 @@ return view.extend({
 		ctx.stroke();
 		ctx.setLineDash([]);
 
-		ctx.strokeStyle = '#2d8a5f';
+		gradient = ctx.createLinearGradient(0, top, 0, top + plotH);
+		gradient.addColorStop(0, 'rgba(69,183,125,.34)');
+		gradient.addColorStop(1, 'rgba(69,183,125,.02)');
+
+		ctx.fillStyle = gradient;
+		ctx.beginPath();
+		ctx.moveTo(left, top + plotH);
+		ctx.lineTo(left, minY);
+		ctx.lineTo(lowX, minY);
+		ctx.lineTo(highX, maxY);
+		ctx.lineTo(left + plotW, maxY);
+		ctx.lineTo(left + plotW, top + plotH);
+		ctx.closePath();
+		ctx.fill();
+
+		ctx.strokeStyle = '#45b77d';
 		ctx.lineWidth = 3;
 		ctx.lineCap = 'round';
 		ctx.lineJoin = 'round';
@@ -205,7 +226,7 @@ return view.extend({
 
 		if (config.mode === 'manual') {
 			manualY = yForPwm(config.manualPwm);
-			ctx.strokeStyle = '#3b7ddd';
+			ctx.strokeStyle = '#79b8ff';
 			ctx.lineWidth = 2;
 			ctx.setLineDash([6, 4]);
 			ctx.beginPath();
@@ -223,13 +244,16 @@ return view.extend({
 
 			currentX = xForTemp(config.currentTemp);
 			currentY = yForPwm(config.currentPwm);
-			ctx.fillStyle = '#d14545';
+			ctx.fillStyle = '#ff5d5d';
+			ctx.strokeStyle = 'rgba(255,255,255,.8)';
+			ctx.lineWidth = 2;
 			ctx.beginPath();
 			ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
 			ctx.fill();
+			ctx.stroke();
 		}
 
-		ctx.fillStyle = '#666';
+		ctx.fillStyle = 'rgba(255,255,255,.62)';
 		ctx.font = '12px sans-serif';
 		ctx.textBaseline = 'middle';
 		ctx.fillText('255', 18, top);
@@ -241,6 +265,15 @@ return view.extend({
 		ctx.fillText(_('%s 掳C').format(config.high), highX - 18, top + plotH + 12);
 		ctx.fillText(_('%s 掳C').format(tempMax), left + plotW - 42, top + plotH + 12);
 		ctx.fillText(_('娓╁害'), left + plotW - 28, top + plotH + 28);
+		ctx.fillStyle = '#17191c';
+		ctx.fillRect(left - 4, top + plotH + 4, plotW + 8, 42);
+		ctx.fillStyle = 'rgba(255,255,255,.62)';
+		ctx.textBaseline = 'top';
+		ctx.fillText(tempMin + ' C', left, top + plotH + 12);
+		ctx.fillText(config.low + ' C', lowX - 18, top + plotH + 12);
+		ctx.fillText(config.high + ' C', highX - 18, top + plotH + 12);
+		ctx.fillText(tempMax + ' C', left + plotW - 42, top + plotH + 12);
+		ctx.fillText('Temp', left + plotW - 30, top + plotH + 28);
 	},
 
 	curvePanel: function(data) {
@@ -357,11 +390,27 @@ return view.extend({
 		return E('div', { 'class': 'h5000m-fan-curve' }, [
 			E('h3', _('风扇曲线')),
 			E('div', { 'class': 'h5000m-fan-curve-box' }, [
-				E('canvas', { id: canvasId, 'class': 'h5000m-fan-curve-canvas', width: '720', height: '240' }),
+				E('div', { 'class': 'h5000m-fan-curve-layout' }, [
+					E('canvas', { id: canvasId, 'class': 'h5000m-fan-curve-canvas', width: '720', height: '280' }),
+					E('div', { 'class': 'h5000m-fan-curve-side' }, [
+						E('div', { 'class': 'h5000m-fan-curve-chip' }, [
+							E('div', { 'class': 'h5000m-fan-curve-chip-title' }, _('温度区间')),
+							E('div', { 'class': 'h5000m-fan-curve-chip-value' }, low + ' - ' + high + ' C')
+						]),
+						E('div', { 'class': 'h5000m-fan-curve-chip' }, [
+							E('div', { 'class': 'h5000m-fan-curve-chip-title' }, _('PWM 区间')),
+							E('div', { 'class': 'h5000m-fan-curve-chip-value' }, minPwm + ' - ' + maxPwm)
+						]),
+						E('div', { 'class': 'h5000m-fan-curve-chip' }, [
+							E('div', { 'class': 'h5000m-fan-curve-chip-title' }, _('当前 PWM')),
+							E('div', { 'class': 'h5000m-fan-curve-chip-value' }, isNaN(currentPwm) ? '-' : currentPwm)
+						])
+					])
+				]),
 				E('div', { 'class': 'h5000m-fan-legend' }, [
-					E('span', [ E('span', { 'class': 'h5000m-fan-swatch', style: 'background:#2d8a5f' }), _('自动曲线') ]),
-					mode === 'manual' ? E('span', [ E('span', { 'class': 'h5000m-fan-swatch', style: 'background:#3b7ddd' }), _('手动 PWM') ]) : null,
-					marker ? E('span', [ E('span', { 'class': 'h5000m-fan-swatch', style: 'background:#d14545' }), _('当前状态') ]) : null
+					E('span', [ E('span', { 'class': 'h5000m-fan-swatch', style: 'background:#45b77d' }), _('自动曲线') ]),
+					mode === 'manual' ? E('span', [ E('span', { 'class': 'h5000m-fan-swatch', style: 'background:#79b8ff' }), _('手动 PWM') ]) : null,
+					marker ? E('span', [ E('span', { 'class': 'h5000m-fan-swatch', style: 'background:#ff5d5d' }), _('当前状态') ]) : null
 				]),
 				E('div', { 'class': 'h5000m-fan-note' }, modeText)
 			])
