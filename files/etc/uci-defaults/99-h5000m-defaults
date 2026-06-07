@@ -28,15 +28,39 @@ valid_mac() {
 	echo "$1" | grep -Eq '^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$'
 }
 
+mac_add() {
+	local mac="$1"
+	local add="$2"
+	local oldifs b1 b2 b3 b4 b5 b6 value
+
+	oldifs="${IFS}"
+	IFS=:
+	set -- ${mac}
+	IFS="${oldifs}"
+	b1="$1"
+	b2="$2"
+	b3="$3"
+	b4="$4"
+	b5="$5"
+	b6="$6"
+	value=$(( (0x${b4} << 16) + (0x${b5} << 8) + 0x${b6} + add ))
+	value=$(( value & 0xffffff ))
+	printf '%02x:%02x:%02x:%02x:%02x:%02x' $(( 0x${b1} )) $(( 0x${b2} )) $(( 0x${b3} )) \
+		$(( (value >> 16) & 0xff )) $(( (value >> 8) & 0xff )) $(( value & 0xff ))
+}
+
 logger -t h5000m-defaults "Set default LAN address to 192.168.10.1"
 uci -q set network.lan.proto='static'
 uci -q set network.lan.ipaddr='192.168.10.1'
 uci -q set network.lan.netmask='255.255.255.0'
 
-logger -t h5000m-defaults "Apply default MAC addresses from U-Boot environment"
+logger -t h5000m-defaults "Apply MAC addresses derived from U-Boot ethaddr"
 lan_mac="$(read_uboot_env ethaddr || true)"
-wan_mac="$(read_uboot_env eth1addr || true)"
-if valid_mac "${lan_mac}" && valid_mac "${wan_mac}"; then
+if valid_mac "${lan_mac}"; then
+	wan_mac="$(mac_add "${lan_mac}" 1)"
+	wifi24_mac="$(mac_add "${lan_mac}" 2)"
+	wifi5_mac="$(mac_add "${lan_mac}" 3)"
+
 	uci -q set network.eth0_dev='device'
 	uci -q set network.eth0_dev.name='eth0'
 	uci -q set network.eth0_dev.macaddr="${lan_mac}"
@@ -46,7 +70,7 @@ if valid_mac "${lan_mac}" && valid_mac "${wan_mac}"; then
 	uci -q set network.wan.macaddr="${wan_mac}"
 	uci -q commit network
 else
-	logger -t h5000m-defaults "U-Boot MAC addresses are missing or invalid, keeping system defaults"
+	logger -t h5000m-defaults "U-Boot ethaddr is missing or invalid, keeping system defaults"
 fi
 
 logger -t h5000m-defaults "Write default H5000M QModem slot"
@@ -85,11 +109,28 @@ for radio in $(uci -q show wireless | sed -n 's/^\(wireless\.[^.]*\)=wifi-device
 	uci -q set "${radio}.country=CN"
 done
 
+wifi_index=2
 for section in $(uci -q show wireless | sed -n 's/^\(wireless\.[^.]*\)=wifi-iface$/\1/p'); do
+	device="$(uci -q get "${section}.device")"
+	band="$(uci -q get "wireless.${device}.band")"
 	uci -q set "${section}.disabled=0"
 	uci -q set "${section}.ssid=H5000M"
 	uci -q set "${section}.encryption=psk2"
 	uci -q set "${section}.key=1234567890"
+	if valid_mac "${lan_mac:-}"; then
+		case "${band}" in
+			2g)
+				uci -q set "${section}.macaddr=${wifi24_mac}"
+				;;
+			5g|6g)
+				uci -q set "${section}.macaddr=${wifi5_mac}"
+				;;
+			*)
+				uci -q set "${section}.macaddr=$(mac_add "${lan_mac}" "${wifi_index}")"
+				wifi_index=$((wifi_index + 1))
+				;;
+		esac
+	fi
 done
 uci -q commit wireless
 

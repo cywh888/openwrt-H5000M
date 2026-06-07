@@ -312,9 +312,8 @@ def main() -> int:
 
     mac_case = '''\thiveton,h5000m)
 \t\tlan_mac=$(tr '\\0' '\\n' < /dev/mmcblk0p1 | sed -n 's/^ethaddr=//p' | head -n 1)
-\t\twan_mac=$(tr '\\0' '\\n' < /dev/mmcblk0p1 | sed -n 's/^eth1addr=//p' | head -n 1)
 \t\t[ -n "$lan_mac" ] || lan_mac=$(macaddr_generate_from_mmc_cid mmcblk0)
-\t\t[ -n "$wan_mac" ] || wan_mac=$(macaddr_add "$lan_mac" 1)
+\t\twan_mac=$(macaddr_add "$lan_mac" 1)
 \t\tlabel_mac=$wan_mac
 \t\t;;
 '''
