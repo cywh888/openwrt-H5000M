@@ -4,3 +4,7 @@ build-cache/
 .codex-official-fw/
 __pycache__/
 *.log
+20*年*月*日*.md
+*交接报告*.md
+*完整会话日志*.md
+*总结*.md
