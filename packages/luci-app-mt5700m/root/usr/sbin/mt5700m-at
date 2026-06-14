@@ -75,6 +75,7 @@ at_network_cmd() {
 at_serial_cmd() {
 	local command="$1"
 	local device="$2"
+	local tmp reader rc
 
 	[ -e "${device}" ] || return 1
 
@@ -82,12 +83,15 @@ at_serial_cmd() {
 		stty -F "${device}" 115200 raw -echo -echoe -echok -echoctl -echoke -ixon -ixoff min 0 time 5 2>/dev/null || true
 	fi
 
-	(
-		sleep 1
-		printf '%s\r' "${command}" > "${device}"
-	) &
+	run_with_timeout 1 cat "${device}" >/dev/null 2>&1 || true
 
-	run_with_timeout "${timeout_s}" cat "${device}" 2>/dev/null | awk '
+	tmp="$(mktemp /tmp/mt5700m-at.XXXXXX)" || return 1
+	cat "${device}" > "${tmp}" 2>/dev/null &
+	reader="$!"
+
+	printf '%s\r' "${command}" > "${device}"
+
+	run_with_timeout "${timeout_s}" tail -f "${tmp}" 2>/dev/null | awk '
 		{
 			gsub(/\r/, "")
 			print
@@ -96,6 +100,13 @@ at_serial_cmd() {
 			exit
 		}
 	'
+	rc="$?"
+
+	kill "${reader}" 2>/dev/null || true
+	wait "${reader}" 2>/dev/null || true
+	rm -f "${tmp}"
+
+	return "${rc}"
 }
 
 at_cmd() {
@@ -151,7 +162,6 @@ at_sms_send() {
 					stty -F "${device}" 115200 raw -echo -echoe -echok -echoctl -echoke -ixon -ixoff min 0 time 5 2>/dev/null || true
 				fi
 				(
-					sleep 1
 					printf 'AT+CMGF=1\r' > "${device}"
 					sleep 1
 					printf 'AT+CMGS="%s"\r' "${number}" > "${device}"
