@@ -154,6 +154,8 @@ jobs:
             echo "CONFIG_DEVEL=y"
             echo "CONFIG_CCACHE=y"
             echo "CONFIG_CCACHE_DIR=\"${BUILD_CCACHE_DIR}\""
+            echo "# CONFIG_GDB is not set"
+            echo "# CONFIG_GDB_PYTHON is not set"
           } >> openwrt/.config
 
       - name: 生成配置
