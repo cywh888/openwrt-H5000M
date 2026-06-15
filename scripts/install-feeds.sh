@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_DIR="${ROOT_DIR}/openwrt"
 
-INCLUDE_QMODEM="${INCLUDE_QMODEM:-false}"
+INCLUDE_QMODEM_ORIGINAL="${INCLUDE_QMODEM_ORIGINAL:-${INCLUDE_QMODEM:-false}}"
+INCLUDE_QMODEM_NEXT="${INCLUDE_QMODEM_NEXT:-false}"
 INCLUDE_PASSWALL="${INCLUDE_PASSWALL:-false}"
 INCLUDE_MOSDNS="${INCLUDE_MOSDNS:-false}"
 INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
@@ -37,9 +38,11 @@ for feed in $(feed_names); do
       echo "Skipping full install for small_package; selected packages are installed below."
       ;;
     qmodem)
-      if [ "${INCLUDE_QMODEM}" = "true" ]; then
+      if [ "${INCLUDE_QMODEM_ORIGINAL}" = "true" ] || [ "${INCLUDE_QMODEM_NEXT}" = "true" ]; then
         install_feed_all "${feed}"
-        bash "${ROOT_DIR}/scripts/patch-qmodem-hotplug.sh" "${SRC_DIR}"
+        if [ "${INCLUDE_QMODEM_NEXT}" = "true" ]; then
+          bash "${ROOT_DIR}/scripts/patch-qmodem-hotplug.sh" "${SRC_DIR}"
+        fi
       else
         echo "Skipping qmodem feed because QModem is disabled."
       fi

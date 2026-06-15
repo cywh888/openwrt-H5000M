@@ -94,9 +94,9 @@ if anchor not in text:
 text = text.replace(anchor, insert + anchor, 1)
 path.write_text(text, encoding="utf-8")
 PY
-  echo "已应用 QModem hotplug 过滤补丁：${NET_HOTPLUG}"
+  echo "Applied QModem net hotplug filter: ${NET_HOTPLUG}"
 else
-  echo "跳过 QModem hotplug 补丁：未找到文件或补丁已存在"
+  echo "Skipped QModem net hotplug filter: file missing or already patched."
 fi
 
 if [ -n "${USB_HOTPLUG}" ] && ! grep -q "H5000M_QMODEM_USB_SLOT_FILTER" "${USB_HOTPLUG}"; then
@@ -126,9 +126,9 @@ if anchor not in text:
 text = text.replace(anchor, insert + anchor, 1)
 path.write_text(text, encoding="utf-8")
 PY
-  echo "已应用 QModem USB 槽位过滤补丁：${USB_HOTPLUG}"
+  echo "Applied QModem USB slot filter: ${USB_HOTPLUG}"
 else
-  echo "跳过 QModem USB 槽位过滤补丁：未找到文件或补丁已存在"
+  echo "Skipped QModem USB slot filter: file missing or already patched."
 fi
 
 if [ -n "${QMODEM_NETWORK}" ] && ! grep -q "H5000M_QMODEM_SKIP_LED_SERVICE" "${QMODEM_NETWORK}"; then
@@ -180,9 +180,9 @@ if "H5000M_QMODEM_SKIP_LED_SERVICE" not in text:
 
 path.write_text(text, encoding="utf-8")
 PY
-  echo "已应用 QModem LED 服务跳过补丁：${QMODEM_NETWORK}"
+  echo "Applied QModem LED service guard: ${QMODEM_NETWORK}"
 else
-  echo "跳过 QModem LED 服务补丁：未找到文件或补丁已存在"
+  echo "Skipped QModem LED service guard: file missing or already patched."
 fi
 
 if [ -n "${QMODEM_LED}" ] && ! grep -q "H5000M_QMODEM_LED_EMPTY_GUARD" "${QMODEM_LED}"; then
@@ -223,7 +223,7 @@ if "H5000M_QMODEM_LED_EMPTY_GUARD" not in text:
 
 path.write_text(text, encoding="utf-8")
 PY
-  echo "已应用 QModem LED 空实例保护补丁：${QMODEM_LED}"
+  echo "Applied QModem LED empty-instance guard: ${QMODEM_LED}"
 else
-  echo "跳过 QModem LED 空实例保护补丁：未找到文件或补丁已存在"
+  echo "Skipped QModem LED empty-instance guard: file missing or already patched."
 fi

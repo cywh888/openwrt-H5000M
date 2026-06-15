@@ -19,38 +19,43 @@ on:
         description: 编译线程，留空使用全部核心
         required: false
         default: ""
-      qmodem:
-        description: "1. QModem：5G 模块管理"
+      qmodem_original:
+        description: "1. QModem 原版：5G 模块管理"
         required: true
         type: boolean
         default: true
+      qmodem_next:
+        description: "2. QModem Next：新版界面/扩展功能"
+        required: true
+        type: boolean
+        default: false
       upnp:
-        description: "2. UPnP：端口自动映射"
+        description: "3. UPnP：端口自动映射"
         required: true
         type: boolean
         default: true
       passwall:
-        description: "3. PassWall：代理插件"
+        description: "4. PassWall：代理插件"
         required: true
         type: boolean
         default: true
       homeproxy:
-        description: "4. HomeProxy：代理插件"
+        description: "5. HomeProxy：代理插件"
         required: true
         type: boolean
         default: false
       mosdns:
-        description: "5. MosDNS：DNS 分流插件"
+        description: "6. MosDNS：DNS 分流插件"
         required: true
         type: boolean
         default: true
       vnstat:
-        description: "6. vnStat2: 累计流量统计"
+        description: "7. vnStat2：累计流量统计"
         required: true
         type: boolean
         default: true
       mt5700m:
-        description: "7. MT5700M：原生管理页面"
+        description: "8. MT5700M：原生管理页面"
         required: true
         type: boolean
         default: true
@@ -96,7 +101,8 @@ jobs:
 
       - name: 准备 OpenWrt 源码
         env:
-          INCLUDE_QMODEM: ${{ inputs.qmodem && 'true' || 'false' }}
+          INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
+          INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
           INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_UPNP: ${{ inputs.upnp && 'true' || 'false' }}
@@ -108,7 +114,8 @@ jobs:
       - name: 更新软件源
         working-directory: openwrt
         env:
-          INCLUDE_QMODEM: ${{ inputs.qmodem && 'true' || 'false' }}
+          INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
+          INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
           INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_HOMEPROXY: ${{ inputs.homeproxy && 'true' || 'false' }}
@@ -136,7 +143,8 @@ jobs:
 
       - name: 写入插件选择
         env:
-          INCLUDE_QMODEM: ${{ inputs.qmodem && 'true' || 'false' }}
+          INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
+          INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
           INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_UPNP: ${{ inputs.upnp && 'true' || 'false' }}
@@ -188,7 +196,8 @@ jobs:
 
       - name: 检查插件
         env:
-          INCLUDE_QMODEM: ${{ inputs.qmodem && 'true' || 'false' }}
+          INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
+          INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
           INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_UPNP: ${{ inputs.upnp && 'true' || 'false' }}

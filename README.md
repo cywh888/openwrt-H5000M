@@ -46,7 +46,8 @@ https://github.com/openwrt/openwrt/pull/21398
 
 - `openwrt_ref`: `v25.12.4`
 - `runner_type`: `github-hosted` 或 `self-hosted`
-- `qmodem`: 默认开启
+- `qmodem_original`: 默认开启，使用 `luci-app-qmodem` 原版界面
+- `qmodem_next`: 默认关闭，使用 `luci-app-qmodem-next`、`luci-app-qmodem-monitor`、`luci-app-qmodem-ttlfw4`；不要和 `qmodem_original` 同时开启
 - `upnp`: 默认开启
 - `passwall`: 默认开启
 - `homeproxy`: 默认关闭
