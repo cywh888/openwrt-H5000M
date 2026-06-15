@@ -236,10 +236,9 @@ jobs:
               tail -n 240 "${log}" || true
               echo "::endgroup::"
             done
-          else
-            echo "未找到 logs 目录，回退执行单线程详细编译。"
-            timeout 45m make -j1 V=s || true
           fi
+          echo "执行单线程详细编译以输出真实失败点。"
+          timeout 45m make -j1 V=s || true
 
       - name: 上传失败日志
         if: ${{ failure() && steps.compile.outcome == 'failure' }}
