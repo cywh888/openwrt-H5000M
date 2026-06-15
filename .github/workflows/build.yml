@@ -72,7 +72,6 @@ jobs:
     runs-on: ${{ inputs.runner_type == 'self-hosted' && 'lxc' || 'ubuntu-24.04' }}
     env:
       BUILD_DL_DIR: ${{ inputs.runner_type == 'self-hosted' && '/home/builder/openwrt-h5000m-cache/dl' || '' }}
-      BUILD_CCACHE_DIR: ${{ inputs.runner_type == 'self-hosted' && '/home/builder/openwrt-h5000m-cache/ccache' || '' }}
 
     steps:
       - name: 检出项目
@@ -149,12 +148,11 @@ jobs:
       - name: 配置本地 runner 缓存
         if: ${{ inputs.runner_type == 'self-hosted' }}
         run: |
-          mkdir -p "${BUILD_DL_DIR}" "${BUILD_CCACHE_DIR}"
+          mkdir -p "${BUILD_DL_DIR}"
           {
-            echo "CONFIG_DEVEL=y"
-            echo "CONFIG_TOOLCHAINOPTS=y"
-            echo "CONFIG_CCACHE=y"
-            echo "CONFIG_CCACHE_DIR=\"${BUILD_CCACHE_DIR}\""
+            echo "# CONFIG_DEVEL is not set"
+            echo "# CONFIG_TOOLCHAINOPTS is not set"
+            echo "# CONFIG_CCACHE is not set"
             echo "# CONFIG_GDB is not set"
             echo "# CONFIG_GDB_PYTHON is not set"
           } >> openwrt/.config
@@ -167,19 +165,27 @@ jobs:
         working-directory: openwrt
         run: |
           sed -i \
+            -e '/^CONFIG_DEVEL=/d' \
+            -e '/^# CONFIG_DEVEL is not set/d' \
             -e '/^CONFIG_TOOLCHAINOPTS=/d' \
+            -e '/^# CONFIG_TOOLCHAINOPTS is not set/d' \
+            -e '/^CONFIG_CCACHE=/d' \
+            -e '/^# CONFIG_CCACHE is not set/d' \
+            -e '/^CONFIG_CCACHE_DIR=/d' \
             -e '/^CONFIG_GDB=/d' \
             -e '/^# CONFIG_GDB is not set/d' \
             -e '/^CONFIG_GDB_PYTHON=/d' \
             -e '/^# CONFIG_GDB_PYTHON is not set/d' \
             .config
           {
-            echo "CONFIG_TOOLCHAINOPTS=y"
+            echo "# CONFIG_DEVEL is not set"
+            echo "# CONFIG_TOOLCHAINOPTS is not set"
+            echo "# CONFIG_CCACHE is not set"
             echo "# CONFIG_GDB is not set"
             echo "# CONFIG_GDB_PYTHON is not set"
           } >> .config
           make defconfig
-          grep -E '^(CONFIG_GDB|CONFIG_GDB_PYTHON)=|^# CONFIG_GDB' .config || true
+          grep -E '^(CONFIG_DEVEL|CONFIG_TOOLCHAINOPTS|CONFIG_CCACHE|CONFIG_GDB|CONFIG_GDB_PYTHON)=|^# CONFIG_(DEVEL|TOOLCHAINOPTS|CCACHE|GDB)' .config || true
 
       - name: 检查插件
         env:

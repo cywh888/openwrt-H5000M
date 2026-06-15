@@ -54,6 +54,9 @@ fi
 
 echo "检查 defconfig 后的最终勾选项"
 
+reject_config "CONFIG_DEVEL"
+reject_config "CONFIG_TOOLCHAINOPTS"
+reject_config "CONFIG_CCACHE"
 reject_config "CONFIG_GDB"
 reject_config "CONFIG_GDB_PYTHON"
 
