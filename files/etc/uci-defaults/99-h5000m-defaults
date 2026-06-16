@@ -129,10 +129,10 @@ fi
 
 for radio in $(uci -q show wireless | sed -n 's/^\(wireless\.[^.]*\)=wifi-device$/\1/p'); do
 	band="$(uci -q get "${radio}.band")"
-	uci -q set "${radio}.country=US"
+	uci -q set "${radio}.country=CN"
 	case "${band}" in
 		2g)
-			uci -q set "${radio}.disabled=1"
+			uci -q set "${radio}.disabled=0"
 			uci -q set "${radio}.htmode=EHT40"
 			;;
 		5g)
@@ -153,10 +153,11 @@ for section in $(uci -q show wireless | sed -n 's/^\(wireless\.[^.]*\)=wifi-ifac
 	uci -q set "${section}.encryption=sae-mixed"
 	uci -q set "${section}.key=1234567890"
 	uci -q set "${section}.ieee80211w=1"
+	uci -q set "${section}.ieee80211k=1"
+	uci -q set "${section}.bss_transition=1"
+	uci -q set "${section}.rrm_neighbor_report=1"
+	uci -q set "${section}.rrm_beacon_report=1"
 	case "${band}" in
-		2g)
-			uci -q set "${section}.disabled=1"
-			;;
 		*)
 			uci -q set "${section}.disabled=0"
 			;;
@@ -177,6 +178,24 @@ for section in $(uci -q show wireless | sed -n 's/^\(wireless\.[^.]*\)=wifi-ifac
 	fi
 done
 uci -q commit wireless
+
+if [ -f /etc/config/usteer ]; then
+	logger -t h5000m-defaults "Enable usteer band steering defaults"
+	uci -q get usteer.@usteer[0] >/dev/null 2>&1 || uci -q add usteer usteer >/dev/null
+	uci -q set usteer.@usteer[0].network='lan'
+	uci -q set usteer.@usteer[0].syslog='1'
+	uci -q set usteer.@usteer[0].local_mode='1'
+	uci -q set usteer.@usteer[0].assoc_steering='1'
+	uci -q set usteer.@usteer[0].probe_steering='1'
+	uci -q set usteer.@usteer[0].band_steering_interval='30000'
+	uci -q set usteer.@usteer[0].band_steering_min_snr='-60'
+	uci -q set usteer.@usteer[0].signal_diff_threshold='8'
+	uci -q set usteer.@usteer[0].link_measurement_interval='30000'
+	uci -q delete usteer.@usteer[0].ssid_list
+	uci -q add_list usteer.@usteer[0].ssid_list='H5000M'
+	uci -q commit usteer
+	/etc/init.d/usteer enable >/dev/null 2>&1 || true
+fi
 
 logger -t h5000m-defaults "Remove build-only apk feed entries"
 if [ -f /etc/apk/repositories.d/distfeeds.list ]; then

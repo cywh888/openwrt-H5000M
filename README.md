@@ -33,6 +33,7 @@ https://github.com/openwrt/openwrt/pull/21398
 - HomeProxy：`kenzok8/small-package`
 - UPnP：OpenWrt 官方 feeds
 - ttyd / luci-app-ttyd：OpenWrt 官方 feeds
+- usteer / luci-app-usteer：OpenWrt 官方 feeds，用于同名 SSID 下的 5G 优先引导
 - vnStat2 / luci-app-vnstat2：OpenWrt 官方 feeds
 - MT5700M 管理页面：本项目自带 `luci-app-mt5700m`，参考 `inotdream/mt5700webui-openwrt-server`、`vadimrew/mt5700webui-openwrt-server` 和 `Coming-2022/mt5700m_at_control`。当前同时提供 LuCI 原生页面和内嵌原生 WebUI，默认通过本机 WebSocket/AT 代理访问 MT5700M，避免直接占用 QModem 正在使用的串口。
 
@@ -103,10 +104,11 @@ make -j"$(nproc)"
 - LuCI 默认语言：`auto`，跟随浏览器和系统默认语言
 - WiFi 名称：`H5000M`
 - WiFi 密码：`1234567890`
-- WiFi 区域：`US`
+- WiFi 区域：`CN`
 - WiFi 加密：`WPA2-PSK/WPA3-SAE Mixed Mode`（UCI 为 `sae-mixed`）
-- 2.4G WiFi：默认禁用，默认带宽 `EHT40`，不由本项目强制指定信道
+- 2.4G WiFi：默认启用，默认带宽 `EHT40`，不由本项目强制指定信道
 - 5G WiFi：默认启用，默认带宽 `EHT160`，不由本项目强制指定信道
+- WiFi 漫游与引导：默认集成 `usteer`，并为同名 SSID 开启 802.11k/v、邻居报告和 band steering，尽量引导支持 5G 的客户端优先连接 5G
 - MAC 派生：优先使用 U-Boot `ethaddr`，失效时使用 eMMC CID 稳定兜底；ETH1 / 2.4G WiFi / 5G WiFi 分别使用 `base + 1/+2/+3`
 - 有线 WAN 优先：`wan` / `wan6` metric 为 `10`
 - 5G SIM 备用：QModem 生成的 `USB` / `USBv6` metric 为 `50`
