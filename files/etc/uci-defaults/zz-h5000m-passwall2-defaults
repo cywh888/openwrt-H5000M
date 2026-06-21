@@ -122,6 +122,11 @@ geosite:xbox
 geosite:playstation
 geosite:nintendo'
 
+config shunt_rules 'paypal_services'
+	option remarks 'PayPal'
+	option network 'tcp,udp'
+	option domain_list 'geosite:paypal'
+
 config shunt_rules 'ai_dev_services'
 	option remarks 'AI与开发服务'
 	option network 'tcp,udp'
@@ -161,11 +166,6 @@ config shunt_rules 'google_services'
 	option network 'tcp,udp'
 	option domain_list 'geosite:google'
 	option ip_list 'geoip:google'
-
-config shunt_rules 'paypal_services'
-	option remarks 'PayPal'
-	option network 'tcp,udp'
-	option domain_list 'geosite:paypal'
 
 config shunt_rules 'geolocation_not_cn'
 	option remarks '非中国大陆'
@@ -238,11 +238,11 @@ config nodes 'h5000m_shunt'
 	option China '_direct'
 	option speedtest_services '_direct'
 	option Game_Platform '_direct'
+	option paypal_services '_direct'
 	option ai_dev_services 'auto_select'
 	option streaming_services 'lax'
 	option social_services 'auto_select'
 	option google_services 'auto_select'
-	option paypal_services 'lax'
 	option geolocation_not_cn 'auto_select'
 	option default_node 'auto_select'
 
