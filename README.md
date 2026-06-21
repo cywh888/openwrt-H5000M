@@ -69,7 +69,7 @@ https://github.com/openwrt/openwrt/pull/21398
 - 主节点为 Xray 分流节点：`总分流`。
 - 示例 VLESS 节点：`lax`、`tky`。
 - 自动选择代理：`自动选择代理`，在 `lax` 与 `tky` 之间使用 `leastPing`，fallback 为 `lax`，探测 URL 为 `https://www.gstatic.com/generate_204`。
-- 局域网 SOCKS5：`0.0.0.0:7890`，无认证。
+- SOCKS 代理保持 PassWall2 默认关闭状态，需要时可在 LuCI 中手动启用。
 - IPv6 透明代理默认关闭。
 - 节点信息全部是示例占位，不包含真实 server、UUID、SNI、私钥或订阅。
 
@@ -102,7 +102,7 @@ https://github.com/openwrt/openwrt/pull/21398
 - `upnp`: 默认开启
 - `passwall2`: 默认开启
 - `homeproxy`: 默认关闭
-- `mosdns`: 默认开启
+- `mosdns`: 默认关闭
 - `vnstat`: 默认开启
 - `mt5700m`: 默认开启
 - `eeprom_autoflash`: 默认关闭

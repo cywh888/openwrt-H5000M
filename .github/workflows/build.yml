@@ -48,7 +48,7 @@ on:
         description: "6. MosDNS：DNS 分流插件"
         required: true
         type: boolean
-        default: true
+        default: false
       vnstat:
         description: "7. vnStat2：累计流量统计"
         required: true
