@@ -7,7 +7,7 @@ CONFIG_FILE="${SRC_DIR}/.config"
 
 INCLUDE_QMODEM_ORIGINAL="${INCLUDE_QMODEM_ORIGINAL:-${INCLUDE_QMODEM:-false}}"
 INCLUDE_QMODEM_NEXT="${INCLUDE_QMODEM_NEXT:-false}"
-INCLUDE_PASSWALL="${INCLUDE_PASSWALL:-false}"
+INCLUDE_PASSWALL2="${INCLUDE_PASSWALL2:-${INCLUDE_PASSWALL:-false}}"
 INCLUDE_MOSDNS="${INCLUDE_MOSDNS:-false}"
 INCLUDE_UPNP="${INCLUDE_UPNP:-false}"
 INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
@@ -33,7 +33,7 @@ optional_config() {
   if grep -qx "${symbol}=y" "${CONFIG_FILE}"; then
     echo "已确认：${symbol}=y"
   else
-    echo "提示：${symbol}=y 未进入最终配置，可能是当前 LuCI feed 未生成独立翻译包。"
+    echo "提示：${symbol}=y 未进入最终配置，可能是当前 feed 未生成独立包或被依赖关系合并。"
   fi
 }
 
@@ -149,19 +149,24 @@ if [ "${INCLUDE_UPNP}" = "true" ]; then
   optional_config "CONFIG_PACKAGE_luci-i18n-upnp-zh-cn"
 fi
 
-if [ "${INCLUDE_PASSWALL}" = "true" ]; then
-  require_config "CONFIG_PACKAGE_luci-app-passwall"
-  require_config "CONFIG_PACKAGE_libncurses"
+if [ "${INCLUDE_PASSWALL2}" = "true" ]; then
+  reject_config "CONFIG_PACKAGE_luci-app-passwall"
+  require_config "CONFIG_PACKAGE_luci-app-passwall2"
+  require_config "CONFIG_PACKAGE_luci-app-passwall2_Nftables_Transparent_Proxy"
+  require_config "CONFIG_PACKAGE_luci-app-passwall2_Basic_Core_All"
+  require_config "CONFIG_PACKAGE_xray-core"
+  require_config "CONFIG_PACKAGE_sing-box"
+  require_config "CONFIG_PACKAGE_tcping"
+  require_config "CONFIG_PACKAGE_v2ray-geoip"
+  require_config "CONFIG_PACKAGE_v2ray-geosite"
+  require_config "CONFIG_PACKAGE_v2ray-plugin"
+  require_config "CONFIG_PACKAGE_geoview"
   require_config "CONFIG_PACKAGE_kmod-nft-socket"
   require_config "CONFIG_PACKAGE_kmod-nft-tproxy"
+  require_config "CONFIG_PACKAGE_kmod-nft-nat"
   require_config "CONFIG_PACKAGE_kmod-inet-diag"
   require_config "CONFIG_PACKAGE_kmod-netlink-diag"
   require_config "CONFIG_PACKAGE_kmod-tun"
-  require_config "CONFIG_PACKAGE_chinadns-ng"
-  require_config "CONFIG_PACKAGE_dns2socks"
-  require_config "CONFIG_PACKAGE_ipt2socks"
-  require_config "CONFIG_PACKAGE_microsocks"
-  require_config "CONFIG_PACKAGE_tcping"
 fi
 
 if [ "${INCLUDE_HOMEPROXY}" = "true" ]; then

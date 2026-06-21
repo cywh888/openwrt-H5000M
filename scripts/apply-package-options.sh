@@ -7,7 +7,7 @@ CONFIG_FILE="${SRC_DIR}/.config"
 
 INCLUDE_QMODEM_ORIGINAL="${INCLUDE_QMODEM_ORIGINAL:-${INCLUDE_QMODEM:-false}}"
 INCLUDE_QMODEM_NEXT="${INCLUDE_QMODEM_NEXT:-false}"
-INCLUDE_PASSWALL="${INCLUDE_PASSWALL:-false}"
+INCLUDE_PASSWALL2="${INCLUDE_PASSWALL2:-${INCLUDE_PASSWALL:-false}}"
 INCLUDE_MOSDNS="${INCLUDE_MOSDNS:-false}"
 INCLUDE_UPNP="${INCLUDE_UPNP:-false}"
 INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
@@ -142,13 +142,23 @@ CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y
 EOF
 fi
 
-if [ "${INCLUDE_PASSWALL}" = "true" ]; then
-  echo "启用 PassWall"
+if [ "${INCLUDE_PASSWALL2}" = "true" ]; then
+  echo "启用 PassWall2"
   append_config <<'EOF'
-CONFIG_PACKAGE_luci-app-passwall=y
-CONFIG_PACKAGE_libncurses=y
+CONFIG_PACKAGE_luci-app-passwall2=y
+CONFIG_PACKAGE_luci-app-passwall2_Nftables_Transparent_Proxy=y
+CONFIG_PACKAGE_luci-app-passwall2_Basic_Core_All=y
+CONFIG_PACKAGE_luci-app-passwall2_INCLUDE_V2ray_Plugin=y
+CONFIG_PACKAGE_xray-core=y
+CONFIG_PACKAGE_sing-box=y
+CONFIG_PACKAGE_tcping=y
+CONFIG_PACKAGE_v2ray-geoip=y
+CONFIG_PACKAGE_v2ray-geosite=y
+CONFIG_PACKAGE_v2ray-plugin=y
+CONFIG_PACKAGE_geoview=y
 CONFIG_PACKAGE_kmod-nft-socket=y
 CONFIG_PACKAGE_kmod-nft-tproxy=y
+CONFIG_PACKAGE_kmod-nft-nat=y
 CONFIG_PACKAGE_kmod-inet-diag=y
 CONFIG_PACKAGE_kmod-netlink-diag=y
 CONFIG_PACKAGE_kmod-tun=y

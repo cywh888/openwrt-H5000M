@@ -8,7 +8,7 @@ REPO_URL="${OPENWRT_REPO:-https://github.com/openwrt/openwrt.git}"
 
 INCLUDE_QMODEM_ORIGINAL="${INCLUDE_QMODEM_ORIGINAL:-${INCLUDE_QMODEM:-false}}"
 INCLUDE_QMODEM_NEXT="${INCLUDE_QMODEM_NEXT:-false}"
-INCLUDE_PASSWALL="${INCLUDE_PASSWALL:-false}"
+INCLUDE_PASSWALL2="${INCLUDE_PASSWALL2:-${INCLUDE_PASSWALL:-false}}"
 INCLUDE_MOSDNS="${INCLUDE_MOSDNS:-false}"
 INCLUDE_UPNP="${INCLUDE_UPNP:-false}"
 INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
@@ -48,7 +48,7 @@ append_feed_once() {
 }
 
 need_small_package=false
-if [ "${INCLUDE_PASSWALL}" = "true" ] || \
+if [ "${INCLUDE_PASSWALL2}" = "true" ] || \
    [ "${INCLUDE_MOSDNS}" = "true" ] || \
    [ "${INCLUDE_HOMEPROXY}" = "true" ]; then
   need_small_package=true
@@ -84,7 +84,7 @@ echo "后续本地编译步骤："
 echo "  cd ${SRC_DIR}"
 echo "  ./scripts/feeds update -a"
 echo "  ./scripts/feeds install -a"
-echo "  INCLUDE_QMODEM_ORIGINAL=${INCLUDE_QMODEM_ORIGINAL} INCLUDE_QMODEM_NEXT=${INCLUDE_QMODEM_NEXT} INCLUDE_PASSWALL=${INCLUDE_PASSWALL} INCLUDE_MOSDNS=${INCLUDE_MOSDNS} INCLUDE_UPNP=${INCLUDE_UPNP} INCLUDE_HOMEPROXY=${INCLUDE_HOMEPROXY} bash ${ROOT_DIR}/scripts/apply-package-options.sh"
+echo "  INCLUDE_QMODEM_ORIGINAL=${INCLUDE_QMODEM_ORIGINAL} INCLUDE_QMODEM_NEXT=${INCLUDE_QMODEM_NEXT} INCLUDE_PASSWALL2=${INCLUDE_PASSWALL2} INCLUDE_MOSDNS=${INCLUDE_MOSDNS} INCLUDE_UPNP=${INCLUDE_UPNP} INCLUDE_HOMEPROXY=${INCLUDE_HOMEPROXY} bash ${ROOT_DIR}/scripts/apply-package-options.sh"
 echo "  make defconfig"
 echo "  make download -j\$(nproc)"
 echo "  make -j\$(nproc)"

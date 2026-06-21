@@ -34,8 +34,8 @@ on:
         required: true
         type: boolean
         default: true
-      passwall:
-        description: "4. PassWall：代理插件"
+      passwall2:
+        description: "4. PassWall2：代理与分流"
         required: true
         type: boolean
         default: true
@@ -112,7 +112,7 @@ jobs:
         env:
           INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
           INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
-          INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
+          INCLUDE_PASSWALL2: ${{ inputs.passwall2 && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_UPNP: ${{ inputs.upnp && 'true' || 'false' }}
           INCLUDE_HOMEPROXY: ${{ inputs.homeproxy && 'true' || 'false' }}
@@ -125,7 +125,7 @@ jobs:
         env:
           INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
           INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
-          INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
+          INCLUDE_PASSWALL2: ${{ inputs.passwall2 && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_HOMEPROXY: ${{ inputs.homeproxy && 'true' || 'false' }}
           INCLUDE_VNSTAT: ${{ inputs.vnstat && 'true' || 'false' }}
@@ -154,7 +154,7 @@ jobs:
         env:
           INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
           INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
-          INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
+          INCLUDE_PASSWALL2: ${{ inputs.passwall2 && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_UPNP: ${{ inputs.upnp && 'true' || 'false' }}
           INCLUDE_HOMEPROXY: ${{ inputs.homeproxy && 'true' || 'false' }}
@@ -207,7 +207,7 @@ jobs:
         env:
           INCLUDE_QMODEM_ORIGINAL: ${{ inputs.qmodem_original && 'true' || 'false' }}
           INCLUDE_QMODEM_NEXT: ${{ inputs.qmodem_next && 'true' || 'false' }}
-          INCLUDE_PASSWALL: ${{ inputs.passwall && 'true' || 'false' }}
+          INCLUDE_PASSWALL2: ${{ inputs.passwall2 && 'true' || 'false' }}
           INCLUDE_MOSDNS: ${{ inputs.mosdns && 'true' || 'false' }}
           INCLUDE_UPNP: ${{ inputs.upnp && 'true' || 'false' }}
           INCLUDE_HOMEPROXY: ${{ inputs.homeproxy && 'true' || 'false' }}

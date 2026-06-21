@@ -47,7 +47,26 @@ patch_luci_mosdns_jsmin() {
   echo "Patched luci-app-mosdns to skip JS minification."
 }
 
+patch_passwall2_nftset_empty_insert() {
+  local script="${SRC_DIR}/package/feeds/small_package/luci-app-passwall2/root/usr/share/passwall2/nftables.sh"
+
+  [ -f "${script}" ] || return 0
+
+  if grep -q 'H5000M_EMPTY_NFTSET_GUARD' "${script}"; then
+    echo "PassWall2 nftset empty insert patch already applied."
+    return 0
+  fi
+
+  if grep -q '\[ \$# -gt 0 \] || \[ ! -t 0 \] && insert_nftset' "${script}"; then
+    sed -i 's/\[ \$# -gt 0 \] || \[ ! -t 0 \] && insert_nftset "$nftset_name" "$timeout_argument_element" "$@"/[ "$#" -gt 0 ] \&\& insert_nftset "$nftset_name" "$timeout_argument_element" "$@" # H5000M_EMPTY_NFTSET_GUARD/' "${script}"
+    echo "Patched PassWall2 nftables.sh to skip empty nftset insert in non-interactive builds."
+  else
+    echo "PassWall2 nftset empty insert pattern not found; upstream may already be fixed."
+  fi
+}
+
 patch_tcping
 patch_python_build_backend "${SRC_DIR}/package/feeds/packages/python-pyserial/Makefile" "python-pyserial"
 patch_python_build_backend "${SRC_DIR}/package/feeds/packages/python-websockets/Makefile" "python-websockets"
 patch_luci_mosdns_jsmin
+patch_passwall2_nftset_empty_insert

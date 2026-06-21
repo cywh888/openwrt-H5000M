@@ -6,7 +6,7 @@ SRC_DIR="${ROOT_DIR}/openwrt"
 
 INCLUDE_QMODEM_ORIGINAL="${INCLUDE_QMODEM_ORIGINAL:-${INCLUDE_QMODEM:-false}}"
 INCLUDE_QMODEM_NEXT="${INCLUDE_QMODEM_NEXT:-false}"
-INCLUDE_PASSWALL="${INCLUDE_PASSWALL:-false}"
+INCLUDE_PASSWALL2="${INCLUDE_PASSWALL2:-${INCLUDE_PASSWALL:-false}}"
 INCLUDE_MOSDNS="${INCLUDE_MOSDNS:-false}"
 INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
 
@@ -53,14 +53,16 @@ for feed in $(feed_names); do
   esac
 done
 
-if [ "${INCLUDE_PASSWALL}" = "true" ]; then
+if [ "${INCLUDE_PASSWALL2}" = "true" ]; then
   install_packages small_package \
-    luci-app-passwall \
-    chinadns-ng \
-    dns2socks \
-    ipt2socks \
-    microsocks \
-    tcping
+    luci-app-passwall2 \
+    xray-core \
+    sing-box \
+    tcping \
+    v2ray-geoip \
+    v2ray-geosite \
+    v2ray-plugin \
+    geoview
 fi
 
 if [ "${INCLUDE_MOSDNS}" = "true" ]; then
