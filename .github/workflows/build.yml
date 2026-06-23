@@ -171,8 +171,7 @@ jobs:
             fi
             sleep 5
           done
-          cd ..
-          bash ./scripts/install-feeds.sh
+          bash "${GITHUB_WORKSPACE}/scripts/install-feeds.sh"
 
       - name: 修复第三方 feed
         run: bash ./scripts/patch-feeds.sh
