@@ -44,7 +44,6 @@ https://github.com/openwrt/openwrt/pull/21398
 - HomeProxy：`kenzok8/small-package`
 - UPnP：OpenWrt 官方 feeds
 - ttyd / luci-app-ttyd：OpenWrt 官方 feeds
-- usteer / luci-app-usteer：OpenWrt 官方 feeds，用于同名 SSID 下的 5G 优先引导
 - vnStat2 / luci-app-vnstat2：OpenWrt 官方 feeds
 - MT5700M 管理页面：本项目自带 `luci-app-mt5700m`
 
@@ -154,12 +153,13 @@ make -j"$(nproc)"
 - root 密码：`admin`
 - 默认时区：`Asia/Shanghai`
 - LuCI 默认语言：`auto`
-- WiFi 名称：`H5000M`
+- 2.4G WiFi 名称：`H5000M-2G`
+- 5G WiFi 名称：`H5000M-5G`
 - WiFi 密码：`1234567890`
 - WiFi 区域：`CN`
 - WiFi 加密：`WPA2-PSK/WPA3-SAE Mixed Mode`，UCI 中为 `sae-mixed`
-- 2.4G WiFi：默认启用，默认带宽 `EHT40`，不强制指定信道
-- 5G WiFi：默认启用，默认带宽 `EHT160`，不强制指定信道
+- 2.4G WiFi：默认启用，SSID `H5000M-2G`，默认带宽 `EHT40`，不强制指定信道
+- 5G WiFi：默认启用，SSID `H5000M-5G`，默认带宽 `EHT160`，不强制指定信道
 - 有线 WAN 优先：`wan` / `wan6` metric 为 `10`
 - 5G SIM 备用：QModem 生成的 `USB` / `USBv6` metric 为 `50`
 - 首次启动时清理固件内的 QModem、small_package 和 video 软件源条目

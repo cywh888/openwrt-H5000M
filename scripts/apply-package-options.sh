@@ -36,8 +36,6 @@ CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_luci-app-package-manager=y
 CONFIG_PACKAGE_luci-app-ttyd=y
 CONFIG_PACKAGE_ttyd=y
-CONFIG_PACKAGE_luci-app-usteer=y
-CONFIG_PACKAGE_usteer=y
 CONFIG_PACKAGE_luci-proto-ipv6=y
 CONFIG_PACKAGE_luci-proto-ppp=y
 CONFIG_PACKAGE_rpcd-mod-rrdns=y
@@ -45,7 +43,6 @@ CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
-CONFIG_PACKAGE_luci-i18n-usteer-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-h5000m-fancontrol-zh-cn=y
 CONFIG_PACKAGE_luci-i18n-h5000m-netmode-zh-cn=y
 EOF
