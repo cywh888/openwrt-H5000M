@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SRC_DIR="${ROOT_DIR}/openwrt"
+SRC_DIR="${OPENWRT_SRC_DIR:-${ROOT_DIR}/openwrt}"
 REF="${1:-${OPENWRT_REF:-v25.12.4}}"
 REPO_URL="${OPENWRT_REPO:-https://github.com/openwrt/openwrt.git}"
 
@@ -16,10 +16,12 @@ INCLUDE_HOMEPROXY="${INCLUDE_HOMEPROXY:-false}"
 if [ -d "${SRC_DIR}/.git" ]; then
   echo "更新已有 OpenWrt 官方源码：${REF}"
   git -C "${SRC_DIR}" remote set-url origin "${REPO_URL}"
+  git -C "${SRC_DIR}" reset --hard HEAD
   git -C "${SRC_DIR}" fetch --tags --depth=1 origin "${REF}"
   git -C "${SRC_DIR}" checkout --detach FETCH_HEAD
 else
   echo "克隆 OpenWrt 官方源码：${REF}"
+  mkdir -p "$(dirname "${SRC_DIR}")"
   git clone --depth=1 --branch "${REF}" "${REPO_URL}" "${SRC_DIR}"
 fi
 

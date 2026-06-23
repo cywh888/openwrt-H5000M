@@ -19,13 +19,18 @@ on:
         description: 编译线程，留空使用全部核心
         required: false
         default: ""
+      clean_build:
+        description: 清理本地增量编译目录后全量重编
+        required: true
+        type: boolean
+        default: false
       qmodem_original:
         description: "1. QModem 原版：5G 模块管理"
         required: true
         type: boolean
         default: true
       qmodem_next:
-        description: "2. QModem Next：新版界面/扩展功能"
+        description: "2. QModem Next：新版界面和扩展功能"
         required: true
         type: boolean
         default: false
@@ -78,14 +83,25 @@ env:
 
 jobs:
   build:
-    name: ${{ inputs.runner_type == 'self-hosted' && 'LXC 本地 runner 编译' || 'GitHub 托管机编译' }}
+    name: ${{ inputs.runner_type == 'self-hosted' && 'LXC 本地 runner 编译' || 'GitHub 托管机器编译' }}
     runs-on: ${{ fromJSON(inputs.runner_type == 'self-hosted' && '["self-hosted","Linux","X64","homelab","lxc","openwrt-h5000m"]' || '"ubuntu-24.04"') }}
     env:
       BUILD_DL_DIR: ${{ inputs.runner_type == 'self-hosted' && '/home/builder/openwrt-h5000m-cache/dl' || '' }}
+      OPENWRT_SRC_DIR: ${{ inputs.runner_type == 'self-hosted' && '/home/builder/openwrt-h5000m-build/openwrt' || '' }}
 
     steps:
       - name: 检出项目
         uses: actions/checkout@v4
+
+      - name: 准备本地增量编译目录
+        if: ${{ inputs.runner_type == 'self-hosted' }}
+        run: |
+          if [ "${{ inputs.clean_build }}" = "true" ]; then
+            echo "清理本地增量编译目录：${OPENWRT_SRC_DIR}"
+            rm -rf "${OPENWRT_SRC_DIR}"
+          fi
+          mkdir -p "$(dirname "${OPENWRT_SRC_DIR}")"
+          rm -rf openwrt
 
       - name: 准备 WiFi EEPROM 自动刷写文件
         if: ${{ inputs.eeprom_autoflash }}
@@ -118,7 +134,12 @@ jobs:
           INCLUDE_HOMEPROXY: ${{ inputs.homeproxy && 'true' || 'false' }}
           INCLUDE_VNSTAT: ${{ inputs.vnstat && 'true' || 'false' }}
           INCLUDE_MT5700M: ${{ inputs.mt5700m && 'true' || 'false' }}
-        run: bash ./scripts/prepare-source.sh "${{ inputs.openwrt_ref }}"
+        run: |
+          bash ./scripts/prepare-source.sh "${{ inputs.openwrt_ref }}"
+          if [ -n "${OPENWRT_SRC_DIR}" ]; then
+            rm -rf openwrt
+            ln -s "${OPENWRT_SRC_DIR}" openwrt
+          fi
 
       - name: 更新软件源
         working-directory: openwrt
@@ -168,7 +189,7 @@ jobs:
           INCLUDE_MT5700M: ${{ inputs.mt5700m && 'true' || 'false' }}
         run: bash ./scripts/apply-package-options.sh
 
-      - name: 配置本地 runner 缓存
+      - name: 配置本地下载缓存
         if: ${{ inputs.runner_type == 'self-hosted' }}
         run: |
           mkdir -p "${BUILD_DL_DIR}"
