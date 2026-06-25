@@ -77,6 +77,16 @@ uci -q set network.lan.proto='static'
 uci -q set network.lan.ipaddr='192.168.10.1'
 uci -q set network.lan.netmask='255.255.255.0'
 
+logger -t h5000m-defaults "Apply official H5000M Ethernet layout: eth1 LAN, eth0 WAN"
+for section in $(uci -q show network | sed -n 's/^\(network\.[^=]*\)=device$/\1/p'); do
+	if [ "$(uci -q get "${section}.name")" = "br-lan" ]; then
+		uci -q set "${section}.ports=eth1"
+	fi
+done
+uci -q set network.lan.device='br-lan'
+uci -q set network.wan.device='eth0'
+uci -q set network.wan6.device='eth0'
+
 logger -t h5000m-defaults "Apply MAC addresses derived from U-Boot ethaddr"
 lan_mac="$(get_base_mac || true)"
 if valid_mac "${lan_mac}"; then
