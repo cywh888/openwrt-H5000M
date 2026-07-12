@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_DIR="${OPENWRT_SRC_DIR:-${ROOT_DIR}/openwrt}"
-REF="${1:-${OPENWRT_REF:-v25.12.4}}"
+REF="${1:-${OPENWRT_REF:-main}}"
 REPO_URL="${OPENWRT_REPO:-https://github.com/openwrt/openwrt.git}"
 
 INCLUDE_QMODEM_ORIGINAL="${INCLUDE_QMODEM_ORIGINAL:-${INCLUDE_QMODEM:-false}}"
@@ -23,6 +23,10 @@ if [ -d "${SRC_DIR}/.git" ]; then
   echo "更新已有 OpenWrt 官方源码：${REF}"
   git -C "${SRC_DIR}" remote set-url origin "${REPO_URL}"
   git -C "${SRC_DIR}" reset --hard HEAD
+  # Older project versions generated this DTS as an untracked file. Remove only
+  # that legacy copy so Git can check out the now-official OpenWrt version while
+  # keeping the self-hosted runner's incremental build cache intact.
+  rm -f "${SRC_DIR}/target/linux/mediatek/dts/mt7987a-hiveton-h5000m.dts"
   if git -C "${SRC_DIR}" rev-parse --verify --quiet "refs/tags/${REF}^{commit}" >/dev/null; then
     git -C "${SRC_DIR}" checkout --detach "refs/tags/${REF}^{commit}"
   else
@@ -35,8 +39,14 @@ else
   git clone --depth=1 --branch "${REF}" "${REPO_URL}" "${SRC_DIR}"
 fi
 
-echo "应用 H5000M 设备适配"
-python3 "${ROOT_DIR}/scripts/apply-h5000m.py" "${SRC_DIR}"
+if grep -q '^define Device/hiveton_h5000m$' "${SRC_DIR}/target/linux/mediatek/image/filogic.mk" && \
+   [ -f "${SRC_DIR}/target/linux/mediatek/dts/mt7987a-hiveton-h5000m.dts" ]; then
+  echo "使用 OpenWrt 官方 H5000M 设备支持"
+else
+  echo "所选 OpenWrt 版本不包含官方 H5000M 设备支持：${REF}"
+  echo "请使用 main 或包含提交 6487cc9a1f4caa07486772be851aaed3d155345d 的版本。"
+  exit 1
+fi
 
 for patch in "${ROOT_DIR}"/patches/optional/*.patch; do
   [ -e "${patch}" ] || continue

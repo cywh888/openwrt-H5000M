@@ -1,19 +1,18 @@
 # openwrt-H5000M
 
-这是一个用于构建 Hiveton/Airpi H5000M 固件的项目。主源码使用 OpenWrt 官方仓库 `openwrt/openwrt`，默认版本为 `v25.12.4`，构建时自动叠加 H5000M 设备适配和可选插件。
+这是一个用于构建 Hiveton/Airpi H5000M 固件的项目。主源码直接使用 OpenWrt 官方仓库 `openwrt/openwrt` 的 `main` 分支及其原生 H5000M 设备支持，构建时仅叠加本项目的默认配置和可选插件。
 
 ## 上游 H5000M PR 注意事项
 
-本项目持续参考 OpenWrt 官方 H5000M 支持 PR：
+H5000M 官方支持已经合并到 OpenWrt `main`：
 https://github.com/openwrt/openwrt/pull/21398
 
 当前需要特别注意：
 
-- 官方 PR 使用 `KERNEL_LOADADDR := 0x40000000`，本项目保持一致。
-- H5000M 当前按官方 PR 方向使用 `eth1` 作为 LAN，`eth0` 作为有线 WAN，本项目按 `ucidef_set_interfaces_lan_wan eth1 eth0` 生成默认网口布局，并在首次启动默认配置中做同向兜底。
-- 官方 PR 当前只把两个 WiFi 指示灯交给 OpenWrt 管理，其他 LED 可能由硬件或厂商服务控制。本项目保持官方 LED 配置，不额外添加 `pwm_led`。
-- 官方 PR 的 `factory` 分区读取方式是从 `mmcblk0p2` 的 `eeprom@0` 读取 `0x1e00` 字节作为 WiFi EEPROM，没有在 `factory` 分区定义有线 MAC。
-- MAC 地址默认从 `/dev/mmcblk0p1` 的 U-Boot 环境变量 `ethaddr` 派生；如果 U-Boot 环境失效，则使用 eMMC CID 生成稳定本地 MAC 作为二级兜底。
+- 项目不再覆盖官方 DTS、镜像、网络、LED、升级或 WiFi MAC 配置。
+- 官方使用 `eth1` 作为 LAN、`eth0` 作为有线 WAN。
+- 官方从 eMMC CID 派生 LAN、WAN 和 WiFi MAC，本项目不再用 U-Boot `ethaddr` 覆盖该策略。
+- 官方从 `mmcblk0p2` 的 `eeprom@0` 读取 `0x1e00` 字节作为 WiFi EEPROM。
 
 ## WiFi EEPROM
 
@@ -31,7 +30,7 @@ https://github.com/openwrt/openwrt/pull/21398
 ## 项目功能
 
 1. 拉取指定版本的 OpenWrt 官方源码。
-2. 应用 H5000M 设备适配：DTS、镜像定义、网络、升级、WiFi MAC、LED、风扇和默认配置。
+2. 验证所选 OpenWrt 源码已经包含官方 H5000M 设备支持。
 3. 使用 `configs/h5000m.seed` 选择 MediaTek Filogic / H5000M 目标。
 4. 按 workflow 选项集成 QModem、PassWall2、MosDNS、UPnP、HomeProxy、vnStat2、MT5700M 管理页面。
 5. 通过 GitHub Actions 或本地 Linux runner 编译固件。
@@ -95,7 +94,7 @@ https://github.com/openwrt/openwrt/pull/21398
 
 建议输入：
 
-- `openwrt_ref`: `v25.12.4`
+- `openwrt_ref`: `main`；后续包含官方 H5000M 支持的分支或发行标签也可使用
 - `runner_type`: `github-hosted` 或 `self-hosted`
 - `qmodem_original`: 默认开启，使用 `luci-app-qmodem` 原版界面
 - `qmodem_next`: 默认关闭，不要和 `qmodem_original` 同时开启
@@ -126,7 +125,7 @@ INCLUDE_PASSWALL2=true \
 INCLUDE_MOSDNS=true \
 INCLUDE_UPNP=true \
 INCLUDE_HOMEPROXY=false \
-bash ./scripts/prepare-source.sh v25.12.4
+bash ./scripts/prepare-source.sh main
 
 cd openwrt
 ./scripts/feeds update -a

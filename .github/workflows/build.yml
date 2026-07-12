@@ -14,7 +14,7 @@ on:
       openwrt_ref:
         description: OpenWrt 版本
         required: true
-        default: v25.12.4
+        default: main
       make_jobs:
         description: 编译线程，留空使用全部核心
         required: false
