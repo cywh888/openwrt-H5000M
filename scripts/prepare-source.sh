@@ -25,8 +25,12 @@ if [ -d "${SRC_DIR}/.git" ]; then
   git -C "${SRC_DIR}" reset --hard HEAD
   # Older project versions generated this DTS as an untracked file. Remove only
   # that legacy copy so Git can check out the now-official OpenWrt version while
-  # keeping the self-hosted runner's incremental build cache intact.
-  rm -f "${SRC_DIR}/target/linux/mediatek/dts/mt7987a-hiveton-h5000m.dts"
+  # keeping the self-hosted runner's incremental build cache intact. Do not
+  # remove the file once it is tracked by the selected official source.
+  legacy_dts="target/linux/mediatek/dts/mt7987a-hiveton-h5000m.dts"
+  if ! git -C "${SRC_DIR}" ls-files --error-unmatch "${legacy_dts}" >/dev/null 2>&1; then
+    rm -f "${SRC_DIR}/${legacy_dts}"
+  fi
   if git -C "${SRC_DIR}" rev-parse --verify --quiet "refs/tags/${REF}^{commit}" >/dev/null; then
     git -C "${SRC_DIR}" checkout --detach "refs/tags/${REF}^{commit}"
   else
