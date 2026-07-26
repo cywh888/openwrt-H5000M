@@ -309,16 +309,18 @@ import sys
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8")
 
-text = text.replace(
-'''start_instance()
+patched = False
+
+old = '''start_instance()
 {
     [ -n "$1" ] || return 1
     config_load qmodem
     procd_kill "$service" "led_$1"
     rc_procd _start_instance "$1"
 }
-''',
-'''start_instance()
+'''
+
+new = '''start_instance()
 {
     # H5000M_QMODEM_LED_EMPTY_GUARD
     local led_script
@@ -330,14 +332,17 @@ text = text.replace(
     procd_kill "$service" "led_$1"
     rc_procd _start_instance "$1"
 }
-''',
-1,
-)
+'''
 
-if "H5000M_QMODEM_LED_EMPTY_GUARD" not in text:
-    raise SystemExit(f"missing qmodem_led start_instance anchor in {path}")
+if old in text:
+    text = text.replace(old, new, 1)
+    patched = True
 
-path.write_text(text, encoding="utf-8")
+if patched:
+    path.write_text(text, encoding="utf-8")
+    print(f"Applied QModem LED empty-instance guard: {path}")
+else:
+    print(f"Skip QModem LED empty-instance guard (unsupported version): {path}")
 PY
   echo "Applied QModem LED empty-instance guard: ${QMODEM_LED}"
 else
