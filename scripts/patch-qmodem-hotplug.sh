@@ -288,10 +288,13 @@ text = text.replace(
 1,
 )
 
-if "H5000M_QMODEM_SKIP_LED_SERVICE" not in text:
-    raise SystemExit(f"missing qmodem_network LED anchor in {path}")
 
-path.write_text(text, encoding="utf-8")
+if "H5000M_QMODEM_SKIP_LED_SERVICE" in text:
+    path.write_text(text, encoding="utf-8")
+    print(f"Patched {path}")
+else:
+    print(f"Skip qmodem_network LED patch (unsupported version): {path}")
+    
 PY
   echo "Applied QModem LED service guard: ${QMODEM_NETWORK}"
 else
