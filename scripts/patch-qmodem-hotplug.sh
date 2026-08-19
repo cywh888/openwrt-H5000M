@@ -330,13 +330,136 @@ text = text.replace(
 ''',
 1,
 )
+if [ -n "${QMODEM_NETWORK}" ] && ! grep -q "H5000M_QMODEM_SKIP_LED_SERVICE" "${QMODEM_NETWORK}"; then
+  python3 - "${QMODEM_NETWORK}" <<'PY'
+from pathlib import Path
+import sys
+import re
 
-if "H5000M_QMODEM_LED_EMPTY_GUARD" not in text:
-    raise SystemExit(f"missing qmodem_led start_instance anchor in {path}")
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
 
-path.write_text(text, encoding="utf-8")
+original = text
+
+start_guard = '''start_led_service()
+{
+    # H5000M_QMODEM_SKIP_LED_SERVICE
+    [ -x /etc/init.d/qmodem_led ] || return 0
+    [ "$(uci -q get qmodem.main.enable_led_service || echo 0)" = "1" ] || return 0
+    /etc/init.d/qmodem_led start_instance "$1" || true
+    logger -t qmodem_network "Forward start LED event for modem $1"
+}
+'''
+
+stop_guard = '''stop_led_service()
+{
+    # H5000M_QMODEM_SKIP_LED_SERVICE
+    [ -x /etc/init.d/qmodem_led ] || return 0
+    [ "$(uci -q get qmodem.main.enable_led_service || echo 0)" = "1" ] || return 0
+    /etc/init.d/qmodem_led stop_instance "$1" || true
+    logger -t qmodem_network "Forward stop LED event for modem $1"
+}
+'''
+
+patched_start = False
+patched_stop = False
+
+# ---------------------------------------------------------
+# 1. 处理 start_led_service
+# ---------------------------------------------------------
+
+start_patterns = [
+    re.compile(
+        r'''start_led_service\(\)\s*\{\s*
+        /etc/init\.d/qmodem_led start_instance "\$1"\s*
+        logger -t qmodem_network "Forward start LED event for modem \$1"\s*
+        \}''',
+        re.VERBOSE
+    ),
+
+    re.compile(
+        r'''start_led_service\(\)\s*\{\s*
+        /etc/init\.d/qmodem_led start_instance "\$1"\s*
+        \}''',
+        re.VERBOSE
+    ),
+]
+
+for pattern in start_patterns:
+    if pattern.search(text):
+        text = pattern.sub(start_guard.rstrip(), text, count=1)
+        patched_start = True
+        break
+
+# ---------------------------------------------------------
+# 2. 处理 stop_led_service
+# ---------------------------------------------------------
+
+stop_patterns = [
+    re.compile(
+        r'''stop_led_service\(\)\s*\{\s*
+        /etc/init\.d/qmodem_led stop_instance "\$1"\s*
+        logger -t qmodem_network "Forward stop LED event for modem \$1"\s*
+        \}''',
+        re.VERBOSE
+    ),
+
+    re.compile(
+        r'''stop_led_service\(\)\s*\{\s*
+        /etc/init\.d/qmodem_led stop_instance "\$1"\s*
+        \}''',
+        re.VERBOSE
+    ),
+]
+
+for pattern in stop_patterns:
+    if pattern.search(text):
+        text = pattern.sub(stop_guard.rstrip(), text, count=1)
+        patched_stop = True
+        break
+
+# ---------------------------------------------------------
+# 3. 如果当前版本根本没有 LED service
+# ---------------------------------------------------------
+
+if not patched_start and not patched_stop:
+    if "/etc/init.d/qmodem_led" not in text:
+        print(
+            f"QModem qmodem_network has no qmodem_led service reference; "
+            f"LED service guard is not required: {path}"
+        )
+        sys.exit(0)
+
+    # 当前版本仍然使用 qmodem_led，但代码结构发生了变化。
+    # 不让这个非核心 patch 阻塞整个固件编译。
+    print(
+        f"Warning: qmodem_network LED structure changed; "
+        f"LED service guard was not applied: {path}"
+    )
+    sys.exit(0)
+
+# ---------------------------------------------------------
+# 4. 写回
+# ---------------------------------------------------------
+
+if text != original:
+    path.write_text(text, encoding="utf-8")
+
+if patched_start and patched_stop:
+    print(f"Applied QModem LED service guard: {path}")
+elif patched_start:
+    print(
+        f"Applied QModem LED start-service guard; "
+        f"stop handler not present: {path}"
+    )
+elif patched_stop:
+    print(
+        f"Applied QModem LED stop-service guard; "
+        f"start handler not present: {path}"
+    )
+
 PY
-  echo "Applied QModem LED empty-instance guard: ${QMODEM_LED}"
+  echo "Applied QModem LED service compatibility guard: ${QMODEM_NETWORK}"
 else
-  echo "Skipped QModem LED empty-instance guard: file missing or already patched."
+  echo "Skipped QModem LED service guard: file missing or already patched."
 fi
