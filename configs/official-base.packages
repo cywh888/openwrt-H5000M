@@ -29,7 +29,6 @@ bind-dig
 jq
 rsync
 unzip
-tar
 openssh-sftp-server
 
 # Common USB and removable-storage support
